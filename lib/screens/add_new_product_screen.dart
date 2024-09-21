@@ -15,7 +15,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
   final TextEditingController _productQuantityTEController = TextEditingController();
   final TextEditingController _productCodeTEController = TextEditingController();
   final TextEditingController _totalPriceTEController = TextEditingController();
-  final TextEditingController _productIDTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _inProgress = false;
@@ -24,7 +23,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Product'),
+        title: const Text('Add New Product'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -43,16 +42,17 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           _buildTextFormField(_productNameTEController, 'Product Name'),
           _buildTextFormField(_productPriceTEController, 'Unit Price'),
           _buildTextFormField(_productCodeTEController, 'Product Code'),
-          _buildTextFormField(_productIDTEController, 'Product ID'),
           _buildTextFormField(_productQuantityTEController, 'Quantity'),
           _buildTextFormField(_totalPriceTEController, 'Total Price'),
           const SizedBox(height: 16),
           _inProgress
               ? const Center(child: CircularProgressIndicator())
               : ElevatedButton(
-            style: ElevatedButton.styleFrom(fixedSize: Size.fromWidth(double.maxFinite)),
+            style: ElevatedButton.styleFrom(
+              fixedSize: const Size.fromWidth(double.maxFinite),
+            ),
             onPressed: _onTapProductAddButton,
-            child: Text('Add Product'),
+            child: const Text('Add Product'),
           ),
         ],
       ),
@@ -81,7 +81,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     _productCodeTEController.clear();
     _productQuantityTEController.clear();
     _totalPriceTEController.clear();
-    _productIDTEController.clear();
   }
 
   @override
@@ -91,7 +90,6 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
     _productCodeTEController.dispose();
     _productQuantityTEController.dispose();
     _totalPriceTEController.dispose();
-    _productIDTEController.dispose();
     super.dispose();
   }
 
@@ -115,26 +113,30 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       "TotalPrice": _totalPriceTEController.text,
     };
 
-    http.Response response = await http.post(
-      uri,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(requestBody),
-    );
-
-    setState(() {
-      _inProgress = false;
-    });
-
-    if (response.statusCode == 200) {
-      _clearTextFields();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product added successfully')),
+    try {
+      http.Response response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
       );
-      Navigator.pop(context); // Go back to the previous screen
-    } else {
+
+      if (response.statusCode == 200) {
+        _clearTextFields();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Product added successfully')),
+        );
+        Navigator.pop(context, true); // Pop and return true to indicate success
+      } else {
+        throw Exception('Failed to add product');
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to add product')),
+        SnackBar(content: Text('Error: $e')),
       );
+    } finally {
+      setState(() {
+        _inProgress = false;
+      });
     }
   }
 }
