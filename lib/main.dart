@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_devjourney_ostad/app.dart';
+import 'package:flutter/cupertino.dart';
 
-void main() {
-  runApp(const WaterTrackerApp());
+import 'CRUDApp.dart';
+
+void main(){
+  runApp(CRUDApp());
 }
