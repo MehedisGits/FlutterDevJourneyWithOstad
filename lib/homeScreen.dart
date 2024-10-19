@@ -8,141 +8,160 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _glassNoTEController =
+  final TextEditingController _glassNoTextEditingController =
       TextEditingController(text: '1');
+
   List<WaterTrack> waterTrackList = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.lightBlue,
-        title: Text(
-          'Water Tracker',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Water Tracker'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _buildWaterTrackCounter(),
-            Expanded(child: _buildWaterTrackListView())
-          ],
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Center(
+          child: Column(
+            children: [
+              _buildTopWidgets(),
+              const SizedBox(height: 10),
+              _buildWaterTrackList()
+            ],
+          ),
         ),
       ),
     );
   }
 
-  ListView _buildWaterTrackListView() {
-    return ListView.separated(
-      itemCount: waterTrackList.length,
-      itemBuilder: (context, index) {
-        WaterTrack waterTrack = waterTrackList[index];
-        return ListTile(
-          title:
-              Text('${waterTrack.dateTime.hour}:${waterTrack.dateTime.minute}'),
-          subtitle: Text(
-              '${waterTrack.dateTime.day}/${waterTrack.dateTime.month}/${waterTrack.dateTime.year}'),
-          // Or remove this line if no date
-          leading: CircleAvatar(
-            child: Text('${waterTrack.numOfGlass}'),
-          ),
-          trailing: IconButton(
-              onPressed: () => _onTapDeleteBtn(index),
-              icon: Icon(Icons.delete)),
-        );
-      },
-      separatorBuilder: (context, index) {
-        return Divider();
-      },
-    );
+  Expanded _buildWaterTrackList() {
+    return Expanded(
+        flex: 80,
+        child: ListView.separated(
+          itemCount: waterTrackList.length,
+          itemBuilder: (context, index) {
+            final WaterTrack waterTrack = waterTrackList[index];
+            return ListTile(
+              title: Text(
+                  '${waterTrack.dateTime.hour}:${waterTrack.dateTime.minute}'),
+              subtitle: Text(
+                  '${waterTrack.dateTime.day}/${waterTrack.dateTime.month}/${waterTrack.dateTime.year}'),
+              leading: CircleAvatar(
+                backgroundColor: Colors.blue,
+                child: Text('${waterTrack.noOfGlass}', style: const TextStyle(color: Colors.white),),
+              ),
+              trailing: TextButton(
+                  onPressed: () {
+                    _onTapDeleteButton(index);
+                  },
+                  child: const Icon(Icons.delete, color: Colors.blue,)),
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) =>
+              const Divider(),
+        ));
   }
 
-  Widget _buildWaterTrackCounter() {
-    return Column(
-      children: [
-        Text(
-          getTotalGlassCount().toString(),
-          style: const TextStyle(fontSize: 24, color: Colors.black),
-        ),
-        const Text(
-          'Glass/s',
-          style: TextStyle(fontSize: 18, color: Colors.black),
-        ),
-        const SizedBox(
-          height: 16,
-        ),
-        SizedBox(
-          height: 16,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 24,
-              width: 100,
-              child: TextField(
-                controller: _glassNoTEController,
-                keyboardType: TextInputType.number,
+  Expanded _buildTopWidgets() {
+    return Expanded(
+      flex: 20,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            getTotalGlassCount().toString(),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const Text(
+            "Glass/s",
+            style: TextStyle(color: Colors.black),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 70,
+                    child: TextFormField(
+                      controller: _glassNoTextEditingController,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('Number of Glass')),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Expanded(
+                    flex: 20,
+                    child: ElevatedButton(
+                      onPressed: _onTapAddNewWaterTrack,
+                      style: customButtonStyle(),
+                      child: const Text(
+                        'Add',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
-            SizedBox(
-              width: 16,
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  _addNewWaterTrack();
-                },
-                child: Text('Add')),
-          ],
-        ),
-        SizedBox(
-          height: 24,
-        ),
-      ],
+          )
+        ],
+      ),
     );
   }
 
   int getTotalGlassCount() {
     int counter = 0;
-    // Loops through the list and adds up all the glasses
     for (WaterTrack t in waterTrackList) {
-      counter += t.numOfGlass;
+      counter += t.noOfGlass;
     }
     return counter;
   }
 
-  void _addNewWaterTrack() {
-    // Ensures there's a default value of '1' glass if the input is empty
-    if (_glassNoTEController.text.isEmpty) {
-      _glassNoTEController.text = '1';
+  void _onTapAddNewWaterTrack() {
+    if (_glassNoTextEditingController.text.isEmpty) {
+      _glassNoTextEditingController.text = '1';
     }
-    // Tries to convert the text to an integer
-    final int numOfGlasses = int.tryParse(_glassNoTEController.text) ?? 1;
+    int noOfGlasses = int.tryParse(_glassNoTextEditingController.text) ?? 1;
 
-    // Creates a new water track entry with the current time
-    WaterTrack waterTrack = WaterTrack(
-      numOfGlass: numOfGlasses,
-      dateTime: DateTime.now(),
-    );
-
-    // Adds the entry to the list and updates the UI
-    setState(() {
-      waterTrackList.add(waterTrack);
-    });
+    WaterTrack waterTrack =
+        WaterTrack(noOfGlass: noOfGlasses, dateTime: DateTime.now());
+    waterTrackList.add(waterTrack);
+    setState(() {});
   }
 
-  void _onTapDeleteBtn(int index) {
+  void _onTapDeleteButton(int index) {
     waterTrackList.removeAt(index);
     setState(() {});
+  }
+
+  ButtonStyle customButtonStyle() {
+    return ElevatedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 4),
+      backgroundColor: Colors.blue, // Button color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6), // Rounded corners
+      ),
+    );
   }
 }
 
 class WaterTrack {
-  final int numOfGlass;
+  final int noOfGlass;
   final DateTime dateTime;
 
-  WaterTrack({required this.numOfGlass, required this.dateTime});
+  WaterTrack({required this.noOfGlass, required this.dateTime});
 }
