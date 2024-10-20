@@ -26,7 +26,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Update Product'),
+        title: const Text('Update Product'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -42,7 +42,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
         children: [
           TextFormField(
             controller: _productNameTEController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Product Name',
               labelText: 'Product Name',
             ),
@@ -50,7 +50,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
           ),
           TextFormField(
             controller: _productPriceTEController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Unit Price',
               labelText: 'Unit Price',
             ),
@@ -58,7 +58,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
           ),
           TextFormField(
             controller: _productCodeTEController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Product Code',
               labelText: 'Product Code',
             ),
@@ -66,7 +66,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
           ),
           TextFormField(
             controller: _productQuantityTEController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Quantity',
               labelText: 'Quantity',
             ),
@@ -74,7 +74,7 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
           ),
           TextFormField(
             controller: _totalPriceTEController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Total Price',
               labelText: 'Total',
             ),
@@ -85,10 +85,10 @@ class _UpdateProductScreenState extends State<UpdateProductScreen> {
               ? const Center(child: CircularProgressIndicator())
               : ElevatedButton(
             style: ElevatedButton.styleFrom(
-              fixedSize: Size.fromWidth(double.maxFinite),
+              fixedSize: const Size.fromWidth(double.maxFinite),
             ),
             onPressed: _onTapProductUpdateButton,
-            child: Text('UPDATE'),
+            child: const Text('UPDATE'),
           ),
         ],
       ),

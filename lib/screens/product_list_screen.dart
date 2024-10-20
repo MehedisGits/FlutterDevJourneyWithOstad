@@ -1,123 +1,142 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_devjourney_ostad/models/product.dart';
-import 'package:flutter_devjourney_ostad/screens/add_new_product_screen.dart';
-import 'package:http/http.dart';
-import '../widgets/product_Item.dart';
+import 'package:flutter_devjourney_ostad/screens/update_product_screen.dart';
+import 'add_new_product_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class ProductListScreen extends StatefulWidget {
+  final ThemeMode themeMode; // Holds the current theme mode (light/dark/system)
+  final VoidCallback onToggleTheme; // Callback function to toggle the theme
+
+  const ProductListScreen(
+      {super.key, required this.themeMode, required this.onToggleTheme});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<ProductListScreen> createState() => _ProductListScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Product> productList = [];
-  bool _isLoading = true; // Loading state
-
-  @override
-  void initState() {
-    super.initState();
-    getProductList();
-  }
+class _ProductListScreenState extends State<ProductListScreen> {
+  // List of product names, generated as placeholders
+  List<String> products = List.generate(100, (index) => 'Product $index');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Product List',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.green,
+        title: const Text('Product List'), // App bar title
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            // Button to toggle the theme (light/dark)
             onPressed: () {
-              getProductList(); // Reload product list when pressed
+              widget.onToggleTheme(); // Calls the toggle theme function
             },
-          ),
+            icon: Icon(Theme.of(context).brightness == Brightness.light
+                ? Icons.dark_mode_outlined // Shows dark mode icon if light theme
+                : Icons.light_mode), // Shows light mode icon if dark theme
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        // Button to navigate to the "Add New Product" screen
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return const AddNewProductScreen();
-          })).then((_) => getProductList()); // Refresh product list after adding
-        },
-        child: const Icon(Icons.add),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // Loader while fetching
-          : productList.isEmpty
-          ? Center(child: Text("No products available")) // Handle empty list
-          : ListView.separated(
-        itemBuilder: (context, index) {
-          return ProductItem(
-            product: productList[index],
-            onDelete: (String id) {
-              setState(() {
-                productList.removeWhere((product) => product.id == id);
-              });
-            },
-            onUpdate: () {
-              getProductList(); // Refresh the product list after updating
-            },
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddNewProductScreen(), // Navigate to add product screen
+            ),
           );
         },
-        separatorBuilder: (context, index) {
-          return const SizedBox(height: 4);
+        child: const Icon(Icons.add), // Icon for adding a new product
+      ),
+      // ListView.builder to display a scrollable list of products
+      body: ListView.builder(
+        itemCount: products.length, // Number of items (products) in the list
+        itemBuilder: (context, index) {
+          String product = products[index]; // Get product name by index
+          return Card(
+            elevation: 2, // Shadow effect for card
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0), // Inner padding for card content
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, // Align content to start
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 50,
+                        child: Text(
+                          product, // Displays the product name
+                          style: const TextStyle(fontSize: 18, color: Colors.green),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 20,
+                        child: IconButton(
+                          // Button to navigate to the update product screen
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => UpdateProductScreen(
+                                  productId: 'ID_$index', // Mock product ID passed
+                                  onUpdate: () {
+                                    // Placeholder for update logic
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.edit, // Edit icon
+                            color: Colors.green, // Green color for edit button
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 20,
+                        child: IconButton(
+                          // Button to delete the product
+                          onPressed: () {
+                            setState(() {
+                              products.removeAt(index); // Remove product from list
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.delete, // Delete icon
+                            color: Colors.red, // Red color for delete button
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8), // Space between rows
+                  Text('Id: ID_$index'), // Mock product ID display
+                  const Text('Unit Price: \$100'), // Placeholder for product price
+                  const Text('Product Code: PRD123'), // Placeholder for product code
+                  const Text('Quantity: 5'), // Placeholder for quantity
+                  const SizedBox(height: 8), // Space before divider
+                  const Divider(), // Divider between product details and total
+                  const SizedBox(height: 4), // Space after divider
+                  const Row(
+                    children: [
+                      Expanded(child: Text('Total Due to Pay:')), // Label for total amount
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end, // Align amount to right
+                          children: [
+                            Text('\$500'), // Placeholder for total amount
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
         },
-        itemCount: productList.length,
       ),
     );
-  }
-
-  Future<void> getProductList() async {
-    setState(() {
-      _isLoading = true; // Show loading indicator
-    });
-
-    try {
-      Uri uri = Uri.parse('http://164.68.107.70:6060/api/v1/ReadProduct');
-      Response response = await get(uri);
-
-      // Log the raw response body for debugging
-      print('Raw Response Body: ${response.body}');
-      print('Status Code: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        print('Decoded JSON: $jsonResponse'); // Log decoded response
-
-        if (jsonResponse.containsKey('data') && jsonResponse['data'] is List) {
-          productList.clear(); // Clear the existing list before adding new data
-          for (var item in jsonResponse['data']) {
-            Product product = Product(
-              id: item['_id'] ?? '',
-              productName: item['ProductName'] ?? '',
-              productCode: item['ProductCode'] ?? '',
-              productImage: item['Img'] ?? '',
-              unitPrice: item['UnitPrice'] ?? '',
-              quantity: item['Qty'],
-              totalPrice: item['TotalPrice'] ?? '',
-              createdAt: item['CreatedDate'] ?? '',
-            );
-            productList.add(product);
-          }
-        } else {
-          print('Invalid or empty data structure in JSON response');
-        }
-      } else {
-        print('Non-200 Status Code: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    } finally {
-      setState(() {
-        _isLoading = false; // Update loading state
-      });
-    }
   }
 }

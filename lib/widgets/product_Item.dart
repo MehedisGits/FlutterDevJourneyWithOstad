@@ -1,6 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_devjourney_ostad/models/product.dart';
-import 'package:flutter_devjourney_ostad/screens/update_product_screen.dart';
 import 'package:http/http.dart' as http;
 
 class ProductItem extends StatelessWidget {
@@ -13,7 +13,6 @@ class ProductItem extends StatelessWidget {
 
   final Product product;
   final Function(String id) onDelete;
-
   final Function onUpdate;
 
   @override
@@ -24,39 +23,54 @@ class ProductItem extends StatelessWidget {
       ),
       title: Text(
         product.productName,
-        style: TextStyle(color: Colors.lightBlue, fontSize: 20),
+        style: const TextStyle(color: Colors.lightBlue, fontSize: 20),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Unit Price: \$${product.unitPrice}', style: TextStyle(color: Colors.black, fontSize: 18)),
-          SizedBox(height: 2),
-          Text('Code: ${product.productCode}', style: TextStyle(color: Colors.black)),
-          SizedBox(height: 2),
-          Text('Quantity: ${product.quantity}', style: TextStyle(color: Colors.black)),
-          SizedBox(height: 4),
-          Divider(color: Colors.black26),
+          Text(
+            'Unit Price: \$${product.unitPrice}',
+            style: const TextStyle(color: Colors.black, fontSize: 18),
+          ),
+          const SizedBox(height: 2),
+          Text('Code: ${product.productCode}', style: const TextStyle(color: Colors.black)),
+          const SizedBox(height: 2),
+          Text('Quantity: ${product.quantity}', style: const TextStyle(color: Colors.black)),
+          const SizedBox(height: 4),
+          const Divider(color: Colors.black26),
           Row(
             children: [
-              Text('Total: \$${product.totalPrice}', style: TextStyle(color: Colors.black, fontSize: 16)),
-              Spacer(),
+              Text(
+                'Total: \$${product.totalPrice}',
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+              ),
+              const Spacer(),
               OverflowBar(
                 children: [
                   TextButton.icon(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) {
-                        return UpdateProductScreen(productId: product.id, onUpdate: () { ();  },);
-                      }));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => UpdateProductScreen(
+                            productId: product.id,
+                            onUpdate: () {
+                              onUpdate(); // Call onUpdate to refresh the list after the product is updated
+                              Navigator.pop(context); // Navigate back to the product list
+                            },
+                          ),
+                        ),
+                      );
                     },
-                    label: Text('Edit'),
-                    icon: Icon(Icons.edit),
+                    label: const Text('Edit'),
+                    icon: const Icon(Icons.edit),
                   ),
                   TextButton.icon(
                     onPressed: () {
                       _deleteProduct(product.id, context);
                     },
-                    label: Text('Delete'),
-                    icon: Icon(Icons.delete, color: Colors.red),
+                    label: const Text('Delete'),
+                    icon: const Icon(Icons.delete, color: Colors.red),
                   ),
                 ],
               ),
@@ -73,25 +87,28 @@ class ProductItem extends StatelessWidget {
     try {
       final http.Response response = await http.delete(uri);
 
-      print('Status Code: ${response.statusCode}'); // Log status code
-      print('Response Body: ${response.body}'); // Log response body
+      if (kDebugMode) {
+        print('Status Code: ${response.statusCode}');
+        print('Response Body: ${response.body}');
+      }
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product deleted successfully')),
         );
-        onDelete(id);
+        onDelete(id); // Notify the parent widget to remove the product from the list
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to delete product')),
         );
       }
     } catch (e) {
-      print('Error occurred: $e');
+      if (kDebugMode) {
+        print('Error occurred: $e');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     }
   }
-
 }
