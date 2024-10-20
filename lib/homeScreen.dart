@@ -1,167 +1,188 @@
 import 'package:flutter/material.dart';
 
+class CalculatorApp extends StatefulWidget {
+  const CalculatorApp({super.key});
+
+  @override
+  State<CalculatorApp> createState() => _CalculatorAppState();
+}
+
+class _CalculatorAppState extends State<CalculatorApp> {
+  // Track the current theme mode (light, dark, or system)
+  ThemeMode _themeMode = ThemeMode.system;
+
+  // Function to toggle between light and dark themes
+  void _toggleTheme() {
+    setState(() {
+      _themeMode =
+          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      // Hide the debug banner
+      home: HomeScreen(themeMode: _themeMode, onToggleTheme: _toggleTheme),
+      theme: _buildLightTheme(),
+      // Light theme
+      darkTheme: _buildDarkTheme(),
+      // Dark theme
+      themeMode: _themeMode, // Set the theme mode
+    );
+  }
+
+  // Method to create the light theme
+  ThemeData _buildLightTheme() {
+    return ThemeData(
+        primarySwatch: Colors.blue, // Primary color of the app
+        brightness: Brightness.light, // Set to light brightness
+        appBarTheme: const AppBarTheme(color: Colors.blue)); // App bar color
+  }
+
+  // Method to create the dark theme
+  ThemeData _buildDarkTheme() {
+    return ThemeData(
+        primarySwatch: Colors.blueGrey, // Primary color for dark theme
+        brightness: Brightness.dark, // Set to dark brightness
+        appBarTheme:
+            const AppBarTheme(color: Colors.blueGrey)); // App bar color
+  }
+}
+
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final ThemeMode themeMode; // Current theme mode
+  final VoidCallback onToggleTheme; // Callback to toggle theme
+
+  const HomeScreen({
+    super.key,
+    required this.themeMode,
+    required this.onToggleTheme,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _glassNoTextEditingController =
-      TextEditingController(text: '1');
+  final TextEditingController _firstTEController =
+      TextEditingController(); // Controller for first number input
+  final TextEditingController _secondTEController =
+      TextEditingController(); // Controller for second number input
+  String _result = ''; // Variable to hold the calculation result
 
-  List<WaterTrack> waterTrackList = [];
+  // Method to perform calculation based on the operator passed
+  void _calculate(String operation) {
+    // Parse the input values as doubles
+    double? firstNumber = double.tryParse(_firstTEController.text);
+    double? secondNumber = double.tryParse(_secondTEController.text);
+
+    // Check if both numbers are valid
+    if (firstNumber != null && secondNumber != null) {
+      double calculationResult;
+
+      // Perform the calculation based on the selected operation
+      switch (operation) {
+        case '+':
+          calculationResult = firstNumber + secondNumber; // Addition
+          break;
+        case '-':
+          calculationResult = firstNumber - secondNumber; // Subtraction
+          break;
+        case '*':
+          calculationResult = firstNumber * secondNumber; // Multiplication
+          break;
+        case '/':
+          // Check for division by zero
+          if (secondNumber != 0) {
+            calculationResult = firstNumber / secondNumber; // Division
+          } else {
+            _result = 'Cannot divide by zero'; // Error message
+            setState(() {});
+            return; // Exit the method if division by zero
+          }
+          break;
+        default:
+          _result = 'Invalid operation'; // Handle unexpected operations
+          setState(() {});
+          return; // Exit the method
+      }
+
+      // Update the result with the calculation
+      _result = 'Result: $calculationResult';
+    } else {
+      // Handle invalid number input
+      _result = 'Please enter valid numbers';
+    }
+
+    setState(() {}); // Trigger UI update
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Water Tracker'),
-        centerTitle: true,
+        title: const Text('Calculator'), // Title of the app
+        actions: [
+          // Toggle theme button in the app bar
+          IconButton(
+            onPressed: () {
+              widget.onToggleTheme(); // Call the toggle theme function
+            },
+            icon: Icon(widget.themeMode == ThemeMode.light
+                ? Icons.light_mode // Icon for light mode
+                : Icons.dark_mode_outlined), // Icon for dark mode
+          )
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Center(
-          child: Column(
-            children: [
-              _buildTopWidgets(),
-              const SizedBox(height: 10),
-              _buildWaterTrackList()
-            ],
-          ),
+        padding: const EdgeInsets.all(16.0), // Padding around the body
+        child: Column(
+          children: [
+            // Text field for the first number
+            TextField(
+              controller: _firstTEController,
+              keyboardType: TextInputType.number, // Number input keyboard
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  label: Text('Enter first number')), // Input label
+            ),
+            const SizedBox(height: 24),
+            // Space between input fields
+            // Text field for the second number
+            TextField(
+              controller: _secondTEController,
+              keyboardType: TextInputType.number, // Number input keyboard
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  label: Text('Enter second number')), // Input label
+            ),
+            const SizedBox(height: 24),
+            // Space between input fields
+            Center(
+              child: ButtonBar(
+                alignment: MainAxisAlignment.center, // Center the buttons
+                children: [
+                  // Operator buttons
+                  TextButton(
+                      onPressed: () => _calculate('+'), child: const Text('+')),
+                  TextButton(
+                      onPressed: () => _calculate('-'), child: const Text('-')),
+                  TextButton(
+                      onPressed: () => _calculate('*'), child: const Text('*')),
+                  TextButton(
+                      onPressed: () => _calculate('/'), child: const Text('/')),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Space below the buttons
+            Text(_result, style: const TextStyle(fontSize: 20)),
+            // Display result
+          ],
         ),
       ),
     );
   }
-
-  Expanded _buildWaterTrackList() {
-    return Expanded(
-        flex: 80,
-        child: ListView.separated(
-          itemCount: waterTrackList.length,
-          itemBuilder: (context, index) {
-            final WaterTrack waterTrack = waterTrackList[index];
-            return ListTile(
-              title: Text(
-                  '${waterTrack.dateTime.hour}:${waterTrack.dateTime.minute}'),
-              subtitle: Text(
-                  '${waterTrack.dateTime.day}/${waterTrack.dateTime.month}/${waterTrack.dateTime.year}'),
-              leading: CircleAvatar(
-                backgroundColor: Colors.blue,
-                child: Text('${waterTrack.noOfGlass}', style: const TextStyle(color: Colors.white),),
-              ),
-              trailing: TextButton(
-                  onPressed: () {
-                    _onTapDeleteButton(index);
-                  },
-                  child: const Icon(Icons.delete, color: Colors.blue,)),
-            );
-          },
-          separatorBuilder: (BuildContext context, int index) =>
-              const Divider(),
-        ));
-  }
-
-  Expanded _buildTopWidgets() {
-    return Expanded(
-      flex: 20,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            getTotalGlassCount().toString(),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const Text(
-            "Glass/s",
-            style: TextStyle(color: Colors.black),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    flex: 70,
-                    child: TextFormField(
-                      controller: _glassNoTextEditingController,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          label: Text('Number of Glass')),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Expanded(
-                    flex: 20,
-                    child: ElevatedButton(
-                      onPressed: _onTapAddNewWaterTrack,
-                      style: customButtonStyle(),
-                      child: const Text(
-                        'Add',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  int getTotalGlassCount() {
-    int counter = 0;
-    for (WaterTrack t in waterTrackList) {
-      counter += t.noOfGlass;
-    }
-    return counter;
-  }
-
-  void _onTapAddNewWaterTrack() {
-    if (_glassNoTextEditingController.text.isEmpty) {
-      _glassNoTextEditingController.text = '1';
-    }
-    int noOfGlasses = int.tryParse(_glassNoTextEditingController.text) ?? 1;
-
-    WaterTrack waterTrack =
-        WaterTrack(noOfGlass: noOfGlasses, dateTime: DateTime.now());
-    waterTrackList.add(waterTrack);
-    setState(() {});
-  }
-
-  void _onTapDeleteButton(int index) {
-    waterTrackList.removeAt(index);
-    setState(() {});
-  }
-
-  ButtonStyle customButtonStyle() {
-    return ElevatedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 4),
-      backgroundColor: Colors.blue, // Button color
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6), // Rounded corners
-      ),
-    );
-  }
-}
-
-class WaterTrack {
-  final int noOfGlass;
-  final DateTime dateTime;
-
-  WaterTrack({required this.noOfGlass, required this.dateTime});
 }
