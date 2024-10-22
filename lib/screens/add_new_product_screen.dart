@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,10 +11,15 @@ class AddNewProductScreen extends StatefulWidget {
 }
 
 class _AddNewProductScreenState extends State<AddNewProductScreen> {
-  final TextEditingController _productNameTEController = TextEditingController();
-  final TextEditingController _productPriceTEController = TextEditingController();
-  final TextEditingController _productQuantityTEController = TextEditingController();
-  final TextEditingController _productCodeTEController = TextEditingController();
+  final TextEditingController _productIDTEController = TextEditingController();
+  final TextEditingController _productNameTEController =
+      TextEditingController();
+  final TextEditingController _productPriceTEController =
+      TextEditingController();
+  final TextEditingController _productQuantityTEController =
+      TextEditingController();
+  final TextEditingController _productCodeTEController =
+      TextEditingController();
   final TextEditingController _totalPriceTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -39,6 +45,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
       key: _formKey,
       child: Column(
         children: [
+          _buildTextFormField(_productIDTEController, 'Product ID'),
           _buildTextFormField(_productNameTEController, 'Product Name'),
           _buildTextFormField(_productPriceTEController, 'Unit Price'),
           _buildTextFormField(_productCodeTEController, 'Product Code'),
@@ -48,12 +55,12 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
           _inProgress
               ? const Center(child: CircularProgressIndicator())
               : ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              fixedSize: const Size.fromWidth(double.maxFinite),
-            ),
-            onPressed: _onTapProductAddButton,
-            child: const Text('Add Product'),
-          ),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: const Size.fromWidth(double.maxFinite),
+                  ),
+                  onPressed: _onTapProductAddButton,
+                  child: const Text('Add Product'),
+                ),
         ],
       ),
     );
@@ -76,6 +83,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
   }
 
   void _clearTextFields() {
+    _productIDTEController.clear();
     _productNameTEController.clear();
     _productPriceTEController.clear();
     _productCodeTEController.clear();
@@ -125,6 +133,7 @@ class _AddNewProductScreenState extends State<AddNewProductScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product added successfully')),
         );
+
         Navigator.pop(context, true); // Pop and return true to indicate success
       } else {
         throw Exception('Failed to add product');
