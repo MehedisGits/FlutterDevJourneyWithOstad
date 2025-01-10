@@ -1,6 +1,6 @@
-# responsive_ui
+# Responsive UI (Assignment)
 
-A new Flutter project.
+Assignment from Ostad batch 7
 
 ## Getting Started
 
