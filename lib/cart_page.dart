@@ -90,7 +90,20 @@ class _CartPageState extends State<CartPage> {
               width: double.infinity,
               height: screenWidth * 0.1,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Show Snackbar using ScaffoldMessenger
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("You've been checked out successfully"),
+                      backgroundColor: Colors.green,  // Background color
+                      duration: Duration(seconds: 2),  // Duration for the snack bar
+                      behavior: SnackBarBehavior.floating,  // Snack bar behavior
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),  // Rounded corners
+                      ),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red, foregroundColor: Colors.white),
                 child: Text('CHECK OUT'),
