@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:getx/controller/counterController.dart';
 import 'package:getx/views/homePage.dart';
 
 void main() {
@@ -22,5 +23,7 @@ class MyApp extends StatelessWidget {
 
 class ControllerBinder extends Bindings {
   @override
-  void dependencies() {}
+  void dependencies() {
+    Get.put(CounterController());
+  }
 }
