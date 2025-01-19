@@ -11,6 +11,11 @@ class HomePage extends StatelessWidget {
           child: Text('GetX'),
         ),
       ),
+      body: Center(
+        child: Column(
+          children: [],
+        ),
+      ),
     );
   }
 }
